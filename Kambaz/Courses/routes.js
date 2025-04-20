@@ -61,7 +61,6 @@ export default function CourseRoutes(app) {
   };
   app.get("/api/courses/:cid/users", findUsersForCourse);
 
-
   app.get("/api/courses/:courseId/quizzes", async (req, res) => {
     const { courseId } = req.params;
     const quizzes = await quizzesDao.findQuizzesForCourse(courseId);
@@ -72,10 +71,18 @@ export default function CourseRoutes(app) {
     const { courseId } = req.params;
     const quizData = {
       ...req.body,
-      course: courseId
+      course: courseId,
     };
     const quiz = await quizzesDao.createQuiz(quizData);
     res.json(quiz);
   });
 
+  app.get("/api/courses/:courseId/quizzes/:quizId", async (req, res) => {
+    const { courseId, quizId } = req.params;
+    const quiz = await quizzesDao.findQuizById(quizId);
+    if (!quiz || quiz.course.toString() !== courseId) {
+      return res.status(404).send("Quiz not found");
+    }
+    res.json(quiz);
+  });
 }
