@@ -75,3 +75,14 @@ export function deleteQuestion(questionId) {
       });
   });
 }
+
+export async function submitQuizAttempt(quizId, attempt) {
+  return quizModel
+    .updateOne(
+      { _id: quizId },
+      { $push: { attempts: { ...attempt, _id: uuidv4() } } }
+    )
+    .then(() => {
+      return quizModel.findOne({ _id: quizId });
+    });
+}
