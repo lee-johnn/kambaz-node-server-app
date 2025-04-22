@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
 import quizModel from "./model.js";
 import questionModel from "./questionModel.js";
+import quizAttemptModel from "./quizAttemptModel.js";
 
 export function createQuiz(quiz) {
   const newQuiz = {
@@ -56,7 +57,6 @@ export function createQuestion(question) {
 
 export async function findQuestionsForQuiz(quizId) {
   const questions = await questionModel.find();
-  console.log(questions);
   return questions.filter((question) => question.quizId === quizId);
 }
 
@@ -77,12 +77,44 @@ export function deleteQuestion(questionId) {
 }
 
 export async function submitQuizAttempt(quizId, attempt) {
-  return quizModel
-    .updateOne(
-      { _id: quizId },
-      { $push: { attempts: { ...attempt, _id: uuidv4() } } }
-    )
-    .then(() => {
-      return quizModel.findOne({ _id: quizId });
+  const attemptNumber = await quizAttemptModel
+    .find({ quizId: quizId, userId: attempt.userId })
+    .then((attempts) => {
+      return attempts.length + 1;
     });
+  console.log("submitting attempt dao", attempt);
+
+  // Create a new quiz attempt document
+  const newAttempt = {
+    _id: attempt._id || uuidv4(),
+    quizId: quizId,
+    userId: attempt.userId,
+    attemptNumber: attemptNumber,
+    score: attempt.score,
+    totalPoints: attempt.totalPoints,
+    startTime: attempt.startTime,
+    endTime: attempt.endTime,
+    answers: attempt.answers,
+  };
+
+  // Create and save the new attempt
+  return quizAttemptModel.create(newAttempt).then(() => {
+    // Return all attempts for this quiz and user if needed
+    return quizAttemptModel.find({
+      quizId: quizId,
+      userId: attempt.userId,
+    });
+  });
+}
+
+export async function findQuizAttempts(quizId, userId) {
+  return quizAttemptModel.find({ quizId: quizId, userId: userId });
+}
+
+export async function findQuizAttempt(quizId, userId, attemptId) {
+  return quizAttemptModel.findOne({
+    _id: attemptId,
+    quizId: quizId,
+    userId: userId,
+  });
 }

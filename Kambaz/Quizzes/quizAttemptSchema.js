@@ -17,5 +17,7 @@ const quizAttemptSchema = new mongoose.Schema(
       },
     ],
   },
-  { timestamps: true }
+  { collection: "quizAttempts" }
 );
+
+export default quizAttemptSchema;

@@ -63,9 +63,29 @@ export default function QuizRoutes(app) {
     res.json(questions);
   });
 
-  app.get("/api/quizzes/:quizId/attempts/:attemptId", async (req, res) => {
+  app.post("/api/quizzes/:quizId/attempt/submit", async (req, res) => {
     const { quizId } = req.params;
-    const attempts = await dao.submitQuizAttempt(quizId, attemptId);
+    const attempt = req.body;
+    console.log("submitting attempt", attempt);
+    const attempts = await dao.submitQuizAttempt(quizId, attempt);
     res.json(attempts);
   });
+
+  app.get("/api/quizzes/:quizId/:userId/attempts", async (req, res) => {
+    const { quizId } = req.params;
+    const { userId } = req.params;
+    const attempts = await dao.findQuizAttempts(quizId, userId);
+    res.json(attempts);
+  });
+
+  app.get(
+    "/api/quizzes/:quizId/:userId/attempt/:attemptId/results",
+    async (req, res) => {
+      const { quizId } = req.params;
+      const { userId } = req.params;
+      const { attemptId } = req.params;
+      const attempt = await dao.findQuizAttempt(quizId, userId, attemptId);
+      res.json(attempt);
+    }
+  );
 }
