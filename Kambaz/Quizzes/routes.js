@@ -34,6 +34,7 @@ export default function QuizRoutes(app) {
       ...req.body,
       quiz: quizId,
     };
+    console.log("Creating question with data:", questionData);
     const question = await dao.createQuestion(questionData);
     res.json(question);
   });

@@ -18,6 +18,8 @@ const questionSchema = new mongoose.Schema(
       },
     ],
     correctAnswer: mongoose.Schema.Types.Mixed,
+    correctAnswers: [String],
+    caseSensitive: Boolean,
   },
   { collection: "quizQuestions" }
 );

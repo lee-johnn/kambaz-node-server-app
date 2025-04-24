@@ -37,22 +37,41 @@ export function publishQuiz(quizId, publishState) {
   );
 }
 
+// export async function createQuestion(question) {
+//   const newQuestion = {
+//     ...question,
+//     _id: uuidv4(),
+//   };
+
+//   return questionModel.create(newQuestion).then((createdQuestion) => {
+//     return quizModel
+//       .updateOne(
+//         { _id: question.quizId },
+//         { $push: { questions: { _id: createdQuestion._id } } }
+//       )
+//       .then(() => {
+//         return createdQuestion;
+//       });
+//   });
+// }
+
 export function createQuestion(question) {
+  console.log("Creating question:", question);
   const newQuestion = {
     ...question,
     _id: uuidv4(),
   };
 
-  return quizModel.create(newQuestion).then((createdQuestion) => {
-    return quizModel
-      .updateOne(
-        { _id: question.quiz },
-        { $push: { questions: createdQuestion._id } }
-      )
-      .then(() => {
-        return createdQuestion;
-      });
-  });
+  return questionModel
+    .create(newQuestion)
+    .then((result) => {
+      console.log("Question created:", result);
+      return result;
+    })
+    .catch((err) => {
+      console.error("Error creating question:", err);
+      throw err;
+    });
 }
 
 export async function findQuestionsForQuiz(quizId) {
@@ -60,18 +79,21 @@ export async function findQuestionsForQuiz(quizId) {
   return questions.filter((question) => question.quizId === quizId);
 }
 
-export function updateQuestion(questionId, questionUpdates) {
-  return quizModel.updateOne({ _id: questionId }, { $set: questionUpdates });
+export async function updateQuestion(questionId, questionUpdates) {
+  return questionModel.updateOne(
+    { _id: questionId },
+    { $set: questionUpdates }
+  );
 }
 
-export function deleteQuestion(questionId) {
-  return quizModel.findOne({ _id: questionId }).then((question) => {
+export async function deleteQuestion(questionId) {
+  return questionModel.findOne({ _id: questionId }).then((question) => {
     if (!question) return null;
 
     return quizModel
-      .updateOne({ _id: question.quiz }, { $pull: { questions: questionId } })
+      .updateOne({ _id: question.quizId }, { $pull: { questions: questionId } })
       .then(() => {
-        return quizModel.deleteOne({ _id: questionId });
+        return questionModel.deleteOne({ _id: questionId });
       });
   });
 }
